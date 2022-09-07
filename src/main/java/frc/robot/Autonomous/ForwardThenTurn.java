@@ -19,21 +19,23 @@ public class ForwardThenTurn implements Autonomous{
         this.gyro = gyro;
     }
 
-    double kP = 0.05;
-    double kI = 0.02;
-    double kD = 0.02;
-    double iLimit = .5;
+    double kP = 0.055;
+    double kI = 0.00055;
+    double kD = 0.0005;
+    double iLimit = 9;
 
     //gyro
-    double gP = .01;
-    double gI = .0001;
-    double gD;
-    double gilimit = 30;
+    double gP = .004;
+    double gI = .001;
+    double gD = 0.02;
+    double gilimit = 90;
     double gerror = 0;
-    double gerrorSum;
+    double gerrorSum = 0;
 
     double distanceTargetInches = 10;
     double turnDegrees = 90;
+    double minTolreance = 0.8;
+    double maxTolerance = 0.8;
     double error = 0;
     double errorSum = 0;
     double lastError = 0;
@@ -53,21 +55,45 @@ public class ForwardThenTurn implements Autonomous{
     public void update() {
         // TODO Auto-generated method stub
 
-        error = distanceTargetInches - ((drivetrain.getLeftDistanceInch() + drivetrain.getRightDistanceInch())/2);
-        currentTime = Timer.getFPGATimestamp() - lastTimestamp;
+        if(drivetrain.getLeftDistanceInch() < 10 || drivetrain.getLeftDistanceInch() < 9.7){
+            error = distanceTargetInches - ((drivetrain.getLeftDistanceInch() + drivetrain.getRightDistanceInch())/2);
+            currentTime = Timer.getFPGATimestamp() - lastTimestamp;
 
-        if(Math.abs(error) < iLimit){
-            errorSum += error + currentTime;
-        }
+            if(Math.abs(error) < iLimit){
+                errorSum += error + currentTime;
+            }
 
-        errorRate = (error - lastError)/currentTime;
+            errorRate = (error - lastError)/currentTime;
+            speedOutput = (kP*error) + (kI * errorSum) + (kD * errorRate);
+            drivetrain.arcadeDrive(speedOutput, 0);
 
-        speedOutput = (kP*error) + (kI * errorSum) + (kD * errorRate);
-        drivetrain.arcadeDrive(speedOutput, 0);
+            lastTimestamp = Timer.getFPGATimestamp();
+            lastError = error;
+        }   
+        if(Math.round(drivetrain.getLeftDistanceInch()) >= 10){
+            currentTime = Timer.getFPGATimestamp() - lastTimestamp;
 
-        lastTimestamp = Timer.getFPGATimestamp();
-        lastError = error;
+            if(gyro.getAngleZ() < 90 - minTolreance){
+                gerror = turnDegrees - gyro.getAngleZ();
+            }
+            if(gyro.getAngleZ() > 90 + maxTolerance){
+                gerror = turnDegrees + gyro.getAngleZ();
+            }
+
+            if(Math.round(gerror) < 75-minTolreance || Math.round(gerror) > 75 + maxTolerance){
+                gerrorSum += gerror + currentTime;
+            }
         
+            output = (gP * gerror) + (gI * gerrorSum);
+            System.out.println(gerror);
+            System.out.println(gerrorSum);
+            System.out.println(output);
+            System.out.println("***");
+
+            drivetrain.arcadeDrive(0, output);
+
+            lastTimestamp = Timer.getFPGATimestamp();
+        }
     }
 
     @Override

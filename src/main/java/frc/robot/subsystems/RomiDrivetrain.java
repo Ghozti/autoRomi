@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Autonomous.ForwardThenTurn;
 
 public class RomiDrivetrain extends SubsystemBase {
   private static final double kCountsPerRevolution = 1440.0;
@@ -33,6 +34,8 @@ public class RomiDrivetrain extends SubsystemBase {
 
   RomiGyro gyro = new RomiGyro();
 
+  ForwardThenTurn forwardThenTurn = new ForwardThenTurn(this, gyro);
+
   /** Creates a new RomiDrivetrain. */
   public RomiDrivetrain() {
     // Use inches as unit for encoder distances
@@ -51,6 +54,7 @@ public class RomiDrivetrain extends SubsystemBase {
   public void resetEncoders() {
     m_leftEncoder.reset();
     m_rightEncoder.reset();
+    forwardThenTurn.reset();
   }
 
   public double getLeftDistanceInch() {
@@ -62,7 +66,7 @@ public class RomiDrivetrain extends SubsystemBase {
   }
 
   public void autonomousPeriodic(){
-
+    forwardThenTurn.update();
   }
 
   public RomiGyro getGyro(){
