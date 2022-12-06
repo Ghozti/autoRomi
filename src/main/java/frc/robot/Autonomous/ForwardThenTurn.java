@@ -25,7 +25,7 @@ public class ForwardThenTurn implements Autonomous{
     double iLimit = 9;
 
     //gyro
-    double gP = .004;
+    double gP = .007;
     double gI = .001;
     double gD = 0.02;
     double gilimit = 90;
@@ -79,14 +79,9 @@ public class ForwardThenTurn implements Autonomous{
             if(gyro.getAngleZ() > 90 + maxTolerance){
                 gerror = turnDegrees + gyro.getAngleZ();
             }
-
-            if(Math.round(gerror) < 75-minTolreance || Math.round(gerror) > 75 + maxTolerance){
-                gerrorSum += gerror + currentTime;
-            }
         
-            output = (gP * gerror) + (gI * gerrorSum);
+            output = (gP * gerror);
             System.out.println(gerror);
-            System.out.println(gerrorSum);
             System.out.println(output);
             System.out.println("***");
 

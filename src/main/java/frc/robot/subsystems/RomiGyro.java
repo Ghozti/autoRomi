@@ -7,10 +7,11 @@ package frc.robot.subsystems;
 import edu.wpi.first.hal.SimDevice;
 import edu.wpi.first.hal.SimDouble;
 import edu.wpi.first.hal.SimDevice.Direction;
+import edu.wpi.first.wpilibj.interfaces.Gyro;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
-public class RomiGyro {
+public class RomiGyro implements Gyro {
   private SimDouble m_simRateX;
   private SimDouble m_simRateY;
   private SimDouble m_simRateZ;
@@ -22,18 +23,20 @@ public class RomiGyro {
   private double m_angleYOffset = -5.822;
   private double m_angleZOffset = -5.371;
 
+  private SimDevice m_gyroSimDevice;
+
   /** Create a new RomiGyro. */
   public RomiGyro() {
-    SimDevice gyroSimDevice = SimDevice.create("Gyro:RomiGyro");
-    if (gyroSimDevice != null) {
-      gyroSimDevice.createBoolean("init", Direction.kOutput, true);
-      m_simRateX = gyroSimDevice.createDouble("rate_x", Direction.kInput, 0.0);
-      m_simRateY = gyroSimDevice.createDouble("rate_y", Direction.kInput, 0.0);
-      m_simRateZ = gyroSimDevice.createDouble("rate_z", Direction.kInput, 0.0);
+    m_gyroSimDevice = SimDevice.create("Gyro:RomiGyro");
+    if (m_gyroSimDevice != null) {
+      m_gyroSimDevice.createBoolean("init", Direction.kOutput, true);
+      m_simRateX = m_gyroSimDevice.createDouble("rate_x", Direction.kInput, 0.0);
+      m_simRateY = m_gyroSimDevice.createDouble("rate_y", Direction.kInput, 0.0);
+      m_simRateZ = m_gyroSimDevice.createDouble("rate_z", Direction.kInput, 0.0);
 
-      m_simAngleX = gyroSimDevice.createDouble("angle_x", Direction.kInput, 0.0);
-      m_simAngleY = gyroSimDevice.createDouble("angle_y", Direction.kInput, 0.0);
-      m_simAngleZ = gyroSimDevice.createDouble("angle_z", Direction.kInput, 0.0);
+      m_simAngleX = m_gyroSimDevice.createDouble("angle_x", Direction.kInput, 0.0);
+      m_simAngleY = m_gyroSimDevice.createDouble("angle_y", Direction.kInput, 0.0);
+      m_simAngleZ = m_gyroSimDevice.createDouble("angle_z", Direction.kInput, 0.0);
     }
   }
 
@@ -122,5 +125,27 @@ public class RomiGyro {
       m_angleYOffset = m_simAngleY.get();
       m_angleZOffset = m_simAngleZ.get();
     }
+  }
+
+  @Override
+  public void close() throws Exception {
+    if (m_gyroSimDevice != null) {
+      m_gyroSimDevice.close();
+    }
+  }
+
+  @Override
+  public void calibrate() {
+    // no-op
+  }
+
+  @Override
+  public double getAngle() {
+    return getAngleZ();
+  }
+
+  @Override
+  public double getRate() {
+    return getRateZ();
   }
 }
